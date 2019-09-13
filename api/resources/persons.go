@@ -97,3 +97,62 @@ func GetOnePerson(w http.ResponseWriter, r *http.Request) {
 	}(repo)
 
 }
+
+func UpdatePerson(w http.ResponseWriter, r *http.Request) {
+
+	// Get params
+	params := mux.Vars(r)
+	id, _ := primitive.ObjectIDFromHex(params["id"])
+
+	// read Body
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	var person models.Person
+	err = json.Unmarshal(body, &person)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	database := database.ConnectToDatabase()
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	repo := repository.NewPersonRepository(ctx, database)
+
+	func(personRepository repository.PeopleRepository) {
+
+		result, err := personRepository.Update(id, person)
+
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		responses.JSON(w, http.StatusOK, map[string]int64{"updatedCount": result.ModifiedCount})
+	}(repo)
+}
+
+func DeletePerson(w http.ResponseWriter, r *http.Request) {
+
+	// Get params
+	params := mux.Vars(r)
+	id, _ := primitive.ObjectIDFromHex(params["id"])
+	database := database.ConnectToDatabase()
+
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	repo := repository.NewPersonRepository(ctx, database)
+
+	func(personRepository repository.PeopleRepository) {
+
+		result, err := personRepository.Delete(id)
+
+		if err != nil {
+			responses.ERROR(w, http.StatusUnprocessableEntity, err)
+			return
+		}
+		responses.JSON(w, http.StatusNoContent, map[string]int64{"deletedCount": result.DeletedCount})
+	}(repo)
+}

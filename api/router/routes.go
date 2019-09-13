@@ -22,8 +22,18 @@ var routes = []Route{
 		Handler: resources.GetPersons,
 	},
 	Route{
-		URI: "/persons/{id}",
-		Method: http.MethodGet,
+		URI:     "/persons/{id}",
+		Method:  http.MethodGet,
 		Handler: resources.GetOnePerson,
+	},
+	Route{
+		URI:     "/persons/{id}",
+		Method:  http.MethodPut,
+		Handler: resources.UpdatePerson,
+	},
+	Route{
+		URI:     "/persons/{id}",
+		Method:  http.MethodDelete,
+		Handler: resources.DeletePerson,
 	},
 }
