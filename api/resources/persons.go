@@ -29,6 +29,11 @@ func CreatePerson(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+	err = person.Validate("create")
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
 	database := database.ConnectToDatabase()
 
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -115,6 +120,13 @@ func UpdatePerson(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &person)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = person.Validate("update")
+
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 
